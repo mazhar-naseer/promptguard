@@ -206,6 +206,10 @@ security.md            threat model and OWASP LLM Top 10 mapping
 
 <br/>
 
+[![PromptGuard Demo](assets/demo-thumbnail.png)](https://drive.google.com/file/d/1e4ep3Q-xw3Dvp4nffu6t4EFblNlUATfT/view?usp=drive_link)
+
+<br/>
+
 <div align="center">
 
 <h2>🤝 Contributing</h2>
