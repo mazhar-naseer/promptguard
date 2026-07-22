@@ -206,7 +206,7 @@ security.md            threat model and OWASP LLM Top 10 mapping
 
 <div align="center">
 
-<h2>💻 PromptGuard Demo</h2>
+<h2>🎥 PromptGuard Demo</h2>
 
 </div>
 
