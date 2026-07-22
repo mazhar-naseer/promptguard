@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Lint (ruff)
+        run: ruff check app
+
+      - name: Type check (mypy)
+        run: mypy app --ignore-missing-imports || true
+
+      - name: Validate seed config files
+        run: |
+          python -c "
+          import json
+          from app.schemas.rule import SeedRulesFile
+          raw = json.loads(open('app/config/rules.json').read())
+          SeedRulesFile(**raw)
+          print('rules.json OK —', len(raw['rules']), 'rules')
+          weights = json.loads(open('app/config/scoring_weights.json').read())
+          assert 'weights' in weights
+          print('scoring_weights.json OK —', len(weights['weights']), 'weights')
+          "
+
+      - name: Run tests
+        run: pytest app/tests -v

@@ -1,0 +1,138 @@
+{
+  "version": "1.0.0",
+  "updated_at": "2026-07-20T00:00:00Z",
+  "rules": [
+    {
+      "id": "instr-override-001",
+      "name": "Ignore previous instructions",
+      "category": "instruction_override",
+      "pattern": "(?i)\\bignore\\s+(all\\s+)?(previous|prior|above|the)\\s+instructions?\\b",
+      "pattern_type": "regex",
+      "severity": "high",
+      "action": "block",
+      "enabled": true,
+      "description": "Classic instruction-override attempt telling the model to disregard its system prompt."
+    },
+    {
+      "id": "instr-override-002",
+      "name": "Disregard system prompt",
+      "category": "instruction_override",
+      "pattern": "(?i)\\bdisregard\\s+(your\\s+)?(system\\s+)?(prompt|rules|guidelines|instructions)\\b",
+      "pattern_type": "regex",
+      "severity": "high",
+      "action": "block",
+      "enabled": true,
+      "description": "Direct request to abandon system-level constraints."
+    },
+    {
+      "id": "instr-override-003",
+      "name": "New instructions override",
+      "category": "instruction_override",
+      "pattern": "(?i)\\byour\\s+new\\s+(instructions?|rules?|directive)\\s+(are|is)\\b",
+      "pattern_type": "regex",
+      "severity": "medium",
+      "action": "flag",
+      "enabled": true,
+      "description": "Attempt to inject a replacement instruction set."
+    },
+    {
+      "id": "roleplay-001",
+      "name": "DAN / persona jailbreak",
+      "category": "roleplay_jailbreak",
+      "pattern": "(?i)\\byou\\s+are\\s+now\\s+(DAN|dan|jailbroken|unrestricted|freed)\\b",
+      "pattern_type": "regex",
+      "severity": "critical",
+      "action": "block",
+      "enabled": true,
+      "description": "Well-known 'Do Anything Now' style persona jailbreak."
+    },
+    {
+      "id": "roleplay-002",
+      "name": "No restrictions roleplay",
+      "category": "roleplay_jailbreak",
+      "pattern": "(?i)\\bpretend\\s+(that\\s+)?you\\s+(have\\s+no|don't\\s+have\\s+any)\\s+(restrictions|rules|filters|guidelines)\\b",
+      "pattern_type": "regex",
+      "severity": "high",
+      "action": "block",
+      "enabled": true,
+      "description": "Roleplay framing used to bypass safety constraints."
+    },
+    {
+      "id": "roleplay-003",
+      "name": "Evil/opposite persona",
+      "category": "roleplay_jailbreak",
+      "pattern": "(?i)\\bact\\s+as\\s+(an?\\s+)?(evil|opposite|unfiltered|amoral)\\b",
+      "pattern_type": "regex",
+      "severity": "medium",
+      "action": "flag",
+      "enabled": true,
+      "description": "Persona-swap attempt commonly used to elicit disallowed content."
+    },
+    {
+      "id": "extraction-001",
+      "name": "System prompt extraction",
+      "category": "system_prompt_extraction",
+      "pattern": "(?i)\\b(reveal|show|print|repeat|output)\\s+(your\\s+)?(system\\s+prompt|initial\\s+instructions|hidden\\s+prompt)\\b",
+      "pattern_type": "regex",
+      "severity": "high",
+      "action": "block",
+      "enabled": true,
+      "description": "Direct request to leak the underlying system prompt."
+    },
+    {
+      "id": "extraction-002",
+      "name": "Repeat instructions verbatim",
+      "category": "system_prompt_extraction",
+      "pattern": "(?i)\\brepeat\\s+(everything\\s+)?(above|before\\s+this|the\\s+text\\s+above)\\s+(verbatim|word\\s+for\\s+word)\\b",
+      "pattern_type": "regex",
+      "severity": "medium",
+      "action": "flag",
+      "enabled": true,
+      "description": "Attempt to exfiltrate prior context verbatim."
+    },
+    {
+      "id": "encoding-001",
+      "name": "Suspicious Base64 block",
+      "category": "encoding_obfuscation",
+      "pattern": "(?i)[A-Za-z0-9+/]{80,}={0,2}",
+      "pattern_type": "regex",
+      "severity": "medium",
+      "action": "flag",
+      "enabled": true,
+      "description": "Long Base64-looking string, often used to smuggle instructions past keyword filters."
+    },
+    {
+      "id": "encoding-002",
+      "name": "Instruction to decode payload",
+      "category": "encoding_obfuscation",
+      "pattern": "(?i)\\bdecode\\s+(this|the\\s+following)\\s+(base64|hex|rot13)\\b",
+      "pattern_type": "regex",
+      "severity": "medium",
+      "action": "flag",
+      "enabled": true,
+      "description": "Explicit instruction to decode an obfuscated payload before acting on it."
+    },
+    {
+      "id": "override-003",
+      "name": "Developer/debug mode claim",
+      "category": "instruction_override",
+      "pattern": "(?i)\\b(developer|debug|maintenance|admin)\\s+mode\\s+(enabled|activated|on)\\b",
+      "pattern_type": "regex",
+      "severity": "high",
+      "action": "block",
+      "enabled": true,
+      "description": "Fake privilege-escalation claim used to convince the model rules no longer apply."
+    },
+    {
+      "id": "override-004",
+      "name": "Hypothetical bypass framing",
+      "category": "instruction_override",
+      "pattern": "(?i)\\bhypothetically,?\\s+if\\s+you\\s+(had\\s+no|didn't\\s+have)\\s+(restrictions|rules)\\b",
+      "pattern_type": "regex",
+      "severity": "medium",
+      "action": "flag",
+      "enabled": true,
+      "description": "Hypothetical framing intended to sidestep content policies."
+    }
+  ]
+}

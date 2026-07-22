@@ -1,0 +1,45 @@
+{
+  "version": "1.0.0",
+  "weights": [
+    {
+      "key": "instruction_override_weight",
+      "value": 35,
+      "description": "Points added when instruction-override language patterns are detected but did not already trigger a block rule."
+    },
+    {
+      "key": "roleplay_weight",
+      "value": 25,
+      "description": "Points added for role-play / persona-swap framing."
+    },
+    {
+      "key": "encoding_weight",
+      "value": 20,
+      "description": "Points added for encoding/obfuscation signals (Base64-like blocks, unusual unicode density)."
+    },
+    {
+      "key": "entropy_weight",
+      "value": 15,
+      "description": "Points added when text entropy exceeds the entropy_threshold, suggesting obfuscated content."
+    },
+    {
+      "key": "entropy_threshold",
+      "value": 4.2,
+      "description": "Shannon entropy (bits/char) above which text is considered abnormally random."
+    },
+    {
+      "key": "length_weight",
+      "value": 10,
+      "description": "Points added for unusually long prompts, a mild signal used only in combination with others."
+    },
+    {
+      "key": "score_review_threshold",
+      "value": 40,
+      "description": "Scores at or above this value are marked Suspicious and routed to the LLM judge if enabled."
+    },
+    {
+      "key": "score_block_threshold",
+      "value": 70,
+      "description": "Scores at or above this value are marked Blocked outright."
+    }
+  ]
+}

@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+{% block title %}Rules · PromptGuard Admin{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div class="page-eyebrow">Admin</div>
+  <h1 class="page-title">Detection rules</h1>
+  <div class="page-sub">Rules are stored in the database and take effect immediately — no redeploy required. Every change here is written to the audit log.</div>
+</div>
+
+<div class="stat-row">
+  <div class="stat-card">
+    <div class="stat-label">Total rules</div>
+    <div class="stat-value" id="stat-total">{{ rules|length }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Enabled</div>
+    <div class="stat-value" id="stat-enabled">{{ rules|selectattr('enabled')|list|length }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Block action</div>
+    <div class="stat-value">{{ rules|selectattr('action', 'equalto', 'block')|list|length }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Flag action</div>
+    <div class="stat-value">{{ rules|selectattr('action', 'equalto', 'flag')|list|length }}</div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <button class="btn-secondary" id="reload-btn">↻ Reload engine</button>
+  <button class="btn-primary" id="new-rule-btn">+ New rule</button>
+</div>
+
+<div class="card" style="padding:0; overflow:hidden;">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Status</th>
+        <th>Name</th>
+        <th>Category</th>
+        <th>Severity</th>
+        <th>Action</th>
+        <th>Pattern</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="rules-body">
+      {% for r in rules %}
+      <tr data-id="{{ r.id }}">
+        <td><span class="pill pill-{{ 'enabled' if r.enabled else 'disabled' }}">{{ 'on' if r.enabled else 'off' }}</span></td>
+        <td>{{ r.name }}</td>
+        <td class="mono">{{ r.category }}</td>
+        <td><span class="rule-chip"><span class="sev sev-{{ r.severity }}"></span>{{ r.severity }}</span></td>
+        <td class="mono">{{ r.action }}</td>
+        <td class="mono" style="max-width:260px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ r.pattern }}</td>
+        <td>
+          <button class="btn-ghost edit-btn" style="width:auto; padding:6px 10px;"
+            data-rule='{{ r|tojson|forceescape }}'>Edit</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="modal-backdrop" id="rule-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-title">New rule</div>
+      <button class="modal-close" id="modal-close">✕</button>
+    </div>
+    <form id="rule-form">
+      <input type="hidden" id="rule-id" />
+      <div class="form-grid">
+        <div class="full">
+          <label>Name</label>
+          <input type="text" id="f-name" required>
+        </div>
+        <div>
+          <label>Category</label>
+          <select id="f-category">
+            <option value="instruction_override">instruction_override</option>
+            <option value="roleplay_jailbreak">roleplay_jailbreak</option>
+            <option value="encoding_obfuscation">encoding_obfuscation</option>
+            <option value="system_prompt_extraction">system_prompt_extraction</option>
+            <option value="custom">custom</option>
+          </select>
+        </div>
+        <div>
+          <label>Pattern type</label>
+          <select id="f-pattern-type">
+            <option value="regex">regex</option>
+            <option value="keyword">keyword</option>
+            <option value="phrase">phrase</option>
+          </select>
+        </div>
+        <div>
+          <label>Severity</label>
+          <select id="f-severity">
+            <option value="low">low</option>
+            <option value="medium" selected>medium</option>
+            <option value="high">high</option>
+            <option value="critical">critical</option>
+          </select>
+        </div>
+        <div>
+          <label>Action</label>
+          <select id="f-action">
+            <option value="flag">flag</option>
+            <option value="block">block</option>
+          </select>
+        </div>
+        <div class="full">
+          <label>Pattern</label>
+          <textarea id="f-pattern" class="field" required placeholder="(?i)\bignore\s+previous\s+instructions\b"></textarea>
+          <div class="helper-text">Regex patterns are validated server-side before saving. Invalid patterns are rejected.</div>
+        </div>
+        <div class="full">
+          <label>Description</label>
+          <textarea id="f-description" class="field"></textarea>
+        </div>
+        <div class="full" style="display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" id="f-enabled" checked style="width:auto;">
+          <label style="margin:0;">Enabled</label>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" id="delete-btn" style="width:auto; display:none;">Delete</button>
+        <button type="button" class="btn-secondary" id="cancel-btn">Cancel</button>
+        <button type="submit" class="btn-primary">Save rule</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const modal = document.getElementById('rule-modal');
+const modalTitle = document.getElementById('modal-title');
+const form = document.getElementById('rule-form');
+const deleteBtn = document.getElementById('delete-btn');
+
+function openModal(rule) {
+  modal.classList.add('open');
+  if (rule) {
+    modalTitle.textContent = 'Edit rule';
+    document.getElementById('rule-id').value = rule.id;
+    document.getElementById('f-name').value = rule.name;
+    document.getElementById('f-category').value = rule.category;
+    document.getElementById('f-pattern-type').value = rule.pattern_type;
+    document.getElementById('f-severity').value = rule.severity;
+    document.getElementById('f-action').value = rule.action;
+    document.getElementById('f-pattern').value = rule.pattern;
+    document.getElementById('f-description').value = rule.description || '';
+    document.getElementById('f-enabled').checked = rule.enabled;
+    deleteBtn.style.display = 'inline-block';
+  } else {
+    modalTitle.textContent = 'New rule';
+    form.reset();
+    document.getElementById('rule-id').value = '';
+    deleteBtn.style.display = 'none';
+  }
+}
+
+function closeModal() {
+  modal.classList.remove('open');
+}
+
+document.getElementById('new-rule-btn').addEventListener('click', () => openModal(null));
+document.getElementById('modal-close').addEventListener('click', closeModal);
+document.getElementById('cancel-btn').addEventListener('click', closeModal);
+modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+document.querySelectorAll('.edit-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const rule = JSON.parse(btn.dataset.rule);
+    openModal(rule);
+  });
+});
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = document.getElementById('rule-id').value;
+  const payload = {
+    name: document.getElementById('f-name').value,
+    category: document.getElementById('f-category').value,
+    pattern_type: document.getElementById('f-pattern-type').value,
+    severity: document.getElementById('f-severity').value,
+    action: document.getElementById('f-action').value,
+    pattern: document.getElementById('f-pattern').value,
+    description: document.getElementById('f-description').value,
+    enabled: document.getElementById('f-enabled').checked,
+  };
+
+  const url = id ? `/api/admin/rules/${id}` : '/api/admin/rules';
+  const method = id ? 'PUT' : 'POST';
+
+  const res = await fetch(url, {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    alert('Error: ' + (err.detail || 'Failed to save rule'));
+    return;
+  }
+  location.reload();
+});
+
+deleteBtn.addEventListener('click', async () => {
+  const id = document.getElementById('rule-id').value;
+  if (!id || !confirm('Delete this rule? This cannot be undone.')) return;
+  const res = await fetch(`/api/admin/rules/${id}`, { method: 'DELETE' });
+  if (!res.ok) {
+    alert('Failed to delete rule');
+    return;
+  }
+  location.reload();
+});
+
+document.getElementById('reload-btn').addEventListener('click', async () => {
+  const res = await fetch('/api/admin/rules/reload', { method: 'POST' });
+  const data = await res.json();
+  alert(`Engine reloaded — ${data.active_rules} active rules (version ${data.rules_version})`);
+});
+</script>
+{% endblock %}

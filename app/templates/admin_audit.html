@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Audit Log · PromptGuard Admin{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div class="page-eyebrow">Admin</div>
+  <h1 class="page-title">Audit log</h1>
+  <div class="page-sub">Immutable record of every rule and scoring-weight change. Entries here can never be edited or deleted.</div>
+</div>
+
+<div class="card" style="padding:0; overflow:hidden;">
+  {% if entries %}
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>User</th>
+        <th>Action</th>
+        <th>Target</th>
+        <th>IP</th>
+        <th>Time</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for e in entries %}
+      <tr>
+        <td class="mono">{{ e.username }}</td>
+        <td><span class="pill pill-{{ 'blocked' if e.action == 'delete' else 'safe' }}">{{ e.action }}</span></td>
+        <td class="mono">{{ e.target_type }}:{{ e.target_id }}</td>
+        <td class="mono">{{ e.ip_address }}</td>
+        <td class="mono">{{ e.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">No changes recorded yet.</div>
+  {% endif %}
+</div>
+{% endblock %}

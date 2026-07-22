@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}History · PromptGuard{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div class="page-eyebrow">Activity</div>
+  <h1 class="page-title">Analysis history</h1>
+  <div class="page-sub">The last 50 prompts analyzed through this console. Blocked inputs never store raw text — only a hash and truncated preview.</div>
+</div>
+
+<div class="card" style="padding:0; overflow:hidden;">
+  {% if logs %}
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Verdict</th>
+        <th>Score</th>
+        <th>Preview</th>
+        <th>Matched rules</th>
+        <th>Time</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for log in logs %}
+      <tr>
+        <td><span class="pill pill-{{ log.verdict }}">{{ log.verdict }}</span></td>
+        <td class="mono">{{ log.score }}</td>
+        <td>{{ log.input_preview }}</td>
+        <td>
+          {% if log.matched_rules %}
+            {% for r in log.matched_rules %}
+              <span class="rule-chip"><span class="sev sev-{{ r.severity }}"></span>{{ r.name }}</span>
+            {% endfor %}
+          {% else %}
+            <span style="color:var(--text-faint)">—</span>
+          {% endif %}
+        </td>
+        <td class="mono">{{ log.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">No prompts analyzed yet. Run one from the Analyze tab to see it here.</div>
+  {% endif %}
+</div>
+{% endblock %}
