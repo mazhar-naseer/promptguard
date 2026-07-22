@@ -1,7 +1,5 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:1a1a2e,100:16213e&height=200&section=header&text=PromptGuard&fontSize=46&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Prompt%20Injection%20%26%20Jailbreak%20Detection%20for%20LLM%20Apps&descAlignY=58&descSize=16" width="100%" />
-
 <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" />
 <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" />
 <img src="https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white" />
