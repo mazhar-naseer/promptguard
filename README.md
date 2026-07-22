@@ -126,3 +126,23 @@ a fourth layer - that is **not** included in this version. The
 `services/detection.py` pipeline is structured so that layer can be added
 later without changing the API contract; treat it as a documented next
 step for the portfolio writeup rather than a current feature.
+
+---
+
+## Contributing
+
+Contributions are welcome. Please open an issue first to discuss significant changes.
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Commit your changes: `git commit -m "feat: add your feature"`
+4. Push and open a Pull Request
+
+---
+
+<div align="center">
+
+**Lumina Shield** © 2026 · AI-Powered Misinformation Defense  
+Built to protect communities from digital deception.
+
+</div>
